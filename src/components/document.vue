@@ -1170,7 +1170,7 @@ export default {
       answersUp: ["יואב", "2025/0037", "01/03/2025"],
       low: "3",
       susInfo: ["256333791", "9543874", 'רב"ט', "לירון אסולין", 'בא"ף 8223'],
-      date: ["01/03/2025", "01.03.2025"],
+      date: ["01/03/2025", "01.03.2025", "01.03.25", "01/03/25"],
       hourA: "18:23",
       copInfo: ["8357012", "סמל", "רוני בן משה", 'מצ"ח 6012'],
       job: 'בלש מצ"ח',
@@ -1240,186 +1240,154 @@ export default {
       }
       console.log("hiiii");
     },
-    checkDoc() {
-      if (this.debugMode) {
+    // פונקציה בדיקת מרכאות
+
+    normalize(text) {
+  if (!text) return "";
+  return text
+    .toString()
+    .trim()
+    .replace(/[\"'״”“]/g, "")
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+},
+
+isWrong(user, correct) {
+  return this.normalize(user) !== this.normalize(correct);
+},
+
+isDateWrong(user, correct) {
+  return !this.normalize(correct).includes(this.normalize(user));
+},
+checkDoc() {
+  if (this.debugMode) {
     this.$emit("to-end");
     return;
   }
-      let rightAns = 0;
-      // פרטי החשוד שורה A
-      this.wrongUserAnswersA = this.userAnswersA.map(
-        (ans, i) => ans.trim() !== this.susInfo[i].trim()
-      );
-      const isCorrect = this.wrongUserAnswersA.every((v) => v === false);
 
-      if (isCorrect) {
-        rightAns++;
-      }
-      // בדיקה של הלמעלה
-      this.wrongUserAnswersUp = this.userAnswerUp
-  .slice(0, 2) // רק האיברים 0 ו-1
-  .map((ans, i) => ans.trim() !== this.answersUp[i].trim());
+  let rightAns = 0;
 
-// בדיקה של האיבר השלישי (תאריך)
-const dateWrong = !this.date.includes(this.userAnswerUp[2].trim());
+  // פרטי החשוד שורה A
+  this.wrongUserAnswersA = this.userAnswersA.map(
+    (ans, i) => this.isWrong(ans, this.susInfo[i])
+  );
+  if (this.wrongUserAnswersA.every(v => v === false)) rightAns++;
 
-// מוסיפים את בדיקת האיבר השלישי למערך
-this.wrongUserAnswersUp.push(dateWrong);
+  // בדיקה של הלמעלה
+  this.wrongUserAnswersUp = this.userAnswerUp
+    .slice(0, 2)
+    .map((ans, i) => this.isWrong(ans, this.answersUp[i]));
 
-// עכשיו מוסיפים את lowWrong כמו שהיה
-const lowWrong = this.userLow.trim() !== this.low.trim();
-this.wrongUserAnswersUp.push(lowWrong);
+  const dateWrong = this.isDateWrong(this.userAnswerUp[2], this.date);
+  this.wrongUserAnswersUp.push(dateWrong);
 
-// בדיקה אם הכל נכון
-const isCorrect1 = this.wrongUserAnswersUp.every((v) => v === false);
+  const lowWrong = this.isWrong(this.userLow, this.low);
+  this.wrongUserAnswersUp.push(lowWrong);
 
-if (isCorrect1) {
-  rightAns++;
-}
+  if (this.wrongUserAnswersUp.every(v => v === false)) rightAns++;
 
-      // בדיקה של תאריך ושעה A
-      this.wrongDateA = !this.date.includes(this.userDateA.trim());
+  // בדיקה של תאריך ושעה A
+  this.wrongDateA = this.isDateWrong(this.userDateA, this.date);
+  this.wrongHourA = this.isWrong(this.userHourA, this.hourA);
 
-      this.wrongHourA = this.userHourA.trim() !== this.hourA.trim();
+  if (!this.wrongDateA && !this.wrongHourA) rightAns++;
 
-      if (!this.wrongDateA && !this.wrongHourA) {
-        rightAns++;
-      }
+  // פרטי השוטר A
+  this.wrongUserAnswersA1 = this.userAnswersA1.map(
+    (ans, i) => this.isWrong(ans, this.copInfo[i])
+  );
+  if (this.wrongUserAnswersA1.every(v => v === false)) rightAns++;
 
-       // בדיקה של פרטי השוטר A
-       this.wrongUserAnswersA1 = this.userAnswersA1.map(
-        (ans, i) => ans.trim() !== this.copInfo[i].trim()
-      );
+  // עבודה + תאריך A
+  this.wrongUserJobA = this.isWrong(this.userJobA, this.job);
+  this.wrongUserDateConfirmationA = this.isDateWrong(
+    this.userDateConfirmationA,
+    this.date
+  );
 
-      const isCorrect2 = this.wrongUserAnswersA1.every((v) => v === false);
+  if (!this.wrongUserJobA && !this.wrongUserDateConfirmationA) rightAns++;
 
-      if (isCorrect2) {
-        rightAns++;
-      }
+  // תאריך, שעה וסימון B
+  this.wrongUserDateB1 = this.isDateWrong(this.userDateB1, this.date);
+  this.wrongUserHourB = this.isWrong(this.userHourB, this.hourB);
+  this.wrongUserMarked = this.isWrong(this.userMarked, this.marked);
+  this.wrongUserDateB2 = this.isDateWrong(this.userDateB2, this.date);
 
-      // בדיקה של עבודה + תאריך A
-      this.wrongUserJobA = this.userJobA.trim() !== this.job.trim();
+  if (
+    !this.wrongUserDateB1 &&
+    !this.wrongUserHourB &&
+    !this.wrongUserMarked &&
+    !this.wrongUserDateB2
+  ) {
+    rightAns++;
+  }
 
-      this.wrongUserDateConfirmationA = !this.date.includes(
-        this.userDateConfirmationA.trim()
-      );
+  // פרטי החשוד B
+  this.wrongUserAnswersB = this.userAnswersB.map(
+    (ans, i) => this.isWrong(ans, this.susInfo[i + 1])
+  );
+  if (this.wrongUserAnswersB.every(v => v === false)) rightAns++;
 
-      if (!this.wrongUserJobA && !this.wrongUserDateConfirmationA) {
-        rightAns++;
-      }
-      // שני תאריך, שעה וסימון B
-      this.wrongUserDateB1 = !this.date.includes(this.userDateB1.trim());
+  // פרטי השוטר B
+  this.wrongUserAnswersB1 = this.userAnswersB1.map(
+    (ans, i) => this.isWrong(ans, this.copInfo[i])
+  );
+  if (this.wrongUserAnswersB1.every(v => v === false)) rightAns++;
 
-this.wrongUserHourB = this.userHourB.trim() !== this.hourB.trim();
+  // תפקיד ותאריך B
+  this.wrongUserJobB = this.isWrong(this.userJobB, this.job);
+  this.wrongUserDateConfirmationB = this.isDateWrong(
+    this.userDateConfirmationB,
+    this.date
+  );
 
-this.wrongUserMarked = this.userMarked.trim() !== this.marked.trim();
+  if (!this.wrongUserJobB && !this.wrongUserDateConfirmationB) rightAns++;
 
-this.wrongUserDateB2 = !this.date.includes(this.userDateB2.trim());
+  // סימון ותאריך C
+  this.wrongUserDateC = this.isDateWrong(this.userDateC, this.date);
+  this.wrongUserMarkedC = this.isWrong(this.userMarkedC, this.marked);
 
-if (
-  !this.wrongUserDateB1 &&
-  !this.wrongUserHourB &&
-  !this.wrongUserMarked &&
-  !this.wrongUserDateB2
-) {
-  rightAns++;
-}
+  if (!this.wrongUserDateC && !this.wrongUserMarkedC) rightAns++;
 
-// בדיקה של פרטי החשוד B
-this.wrongUserAnswersB = this.userAnswersB.map(
-        (ans, i) => ans.trim() !== this.susInfo[i + 1].trim()
-      );
+  // חשוד C + סוג סם
+  this.wrongUserAnswersC = this.userAnswersC.map(
+    (ans, i) => this.isWrong(ans, this.susInfo[i + 1])
+  );
+  this.wrongUserDrugKind = this.isWrong(this.userDrugKind, this.drugKind);
 
-      const isCorrect3 = this.wrongUserAnswersB.every((v) => v === false);
+  if (
+    this.wrongUserAnswersC.every(v => v === false) &&
+    !this.wrongUserDrugKind
+  ) {
+    rightAns++;
+  }
 
-      if (isCorrect3) {
-        rightAns++;
-      }
+  // למטה – חשוד
+  this.wrongUserAnswerDownGiver = this.userAnswerDownGiver.map(
+    (ans, i) => this.isWrong(ans, this.susInfo[i + 1])
+  );
+  if (this.wrongUserAnswerDownGiver.every(v => v === false)) rightAns++;
 
-// בדיקה פרטי השוטר B
-this.wrongUserAnswersB1 = this.userAnswersB1.map(
-        (ans, i) => ans.trim() !== this.copInfo[i].trim()
-      );
-      const isCorrect4 = this.wrongUserAnswersB1.every((v) => v === false);
+  // למטה – שוטר
+  this.wrongUserAnswerDownChecker = this.userAnswerDownChecker.map(
+    (ans, i) => this.isWrong(ans, this.copInfo[i])
+  );
+  if (this.wrongUserAnswerDownChecker.every(v => v === false)) rightAns++;
 
-      if (isCorrect4) {
-        rightAns++;
-      }
-
-      // תפקיד ותאריך B
-      this.wrongUserJobB = this.userJobB.trim() !== this.job.trim();
-
-      this.wrongUserDateConfirmationB = !this.date.includes(
-        this.userDateConfirmationB.trim()
-      );
-
-      if (!this.wrongUserJobB && !this.wrongUserDateConfirmationB) {
-        rightAns++;
-      }
-      // סימון ותאריך C
-      this.wrongUserDateC = !this.date.includes(this.userDateC.trim());
-      this.wrongUserMarkedC = this.userMarkedC.trim() !== this.marked.trim();
-
-      if (!this.wrongUserDateC && !this.wrongUserMarkedC) {
-        rightAns++;
-      }
-
-      //  בדיקה חשוד מערך C + סוג סם
-      this.wrongUserAnswersC = this.userAnswersC.map(
-        (ans, i) => ans.trim() !== this.susInfo[i + 1].trim()
-      );
-
-      this.wrongUserDrugKind =
-        this.userDrugKind.trim() !== this.drugKind.trim();
-
-      const isCorrect5 =
-        this.wrongUserAnswersC.every((v) => v === false) &&
-        !this.wrongUserDrugKind;
-
-      if (isCorrect5) {
-        rightAns++;
-      }
-
-      // מערך בדיקה למטה חשוד
-      this.wrongUserAnswerDownGiver = this.userAnswerDownGiver.map((ans, i) => {
-        return ans.trim() !== this.susInfo[i + 1].trim();
-      });
-
-      const isCorrect6 = this.wrongUserAnswerDownGiver.every((v) => v === false);
-
-      if (isCorrect6) {
-        rightAns++;
-      }
-
-      // מערך בדיקה למטה שוטר
-      this.wrongUserAnswerDownChecker = this.userAnswerDownChecker.map(
-        (ans, i) => {
-          return ans.trim() !== this.copInfo[i].trim();
-        }
-      );
-
-      const isCorrect7 = this.wrongUserAnswerDownChecker.every(
-        (v) => v === false
-      );
-
-      if (isCorrect7) {
-        rightAns++;
-      }
-// סיכום
-      if(rightAns === 13) {
-        this.$emit("result", "right");
-        setTimeout(() => {
-          this.$emit("result", "");
-          this.$emit("to-end");
-        }, 2200);
-      } else {
-        this.$emit("result", "wrong");
-        setTimeout(() => {
-          this.$emit("result", "");
-        }, 2200);
-      }
-
-    },
+  // סיכום
+  if (rightAns === 13) {
+    this.$emit("result", "right");
+    setTimeout(() => {
+      this.$emit("result", "");
+      this.$emit("to-end");
+    }, 2200);
+  } else {
+    this.$emit("result", "wrong");
+    setTimeout(() => {
+      this.$emit("result", "");
+    }, 2200);
+  }
+},
   },
 };
 </script>
