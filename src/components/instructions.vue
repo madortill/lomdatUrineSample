@@ -8,7 +8,6 @@
     <p class="instText">במקרה שחלק מתשובותיכם יהיו שגויות הן יסומנו באדום, תצטרכו לתקן אותן ורק אז תוכלו לעבור הלאה.</p>
     <p class="instText">מאמינים בכם ובטוחים שתמלאו את המסמך כראוי!</p>
 </div>
-<p v-if="isIphone" class="iphone">שימו לב שהמרכאות לאורך הלומדה הן כאלה(") ולא באלכסון(”).</p>
   </div>
 </template>
 
@@ -18,14 +17,9 @@ export default {
   components: {},
   data() {
     return {
-      isIphone: false,
+     
     };
   },
-  mounted() {
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) 
-             || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  this.isIphone = isIOS;
-},
   methods: {
     closeInstruction() {
       this.$emit("close");
