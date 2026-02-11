@@ -18,16 +18,59 @@ export default {
   components: {
     About
   },
+  mounted() {
+    this.launchConfetti();
+  },
   methods: {
     startAgain() {
       this.$emit("start-over");
       
     },
+    launchConfetti() {
+  const colors = ["#0057FF", "#FF1E1E"];
+  const pieces = 200;
+  const container = document.body;
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+
+  for (let i = 0; i < pieces; i++) {
+    const confetti = document.createElement("div");
+    confetti.classList.add("confetti-piece");
+
+    // התחלה מלמטה
+    confetti.style.left = screenWidth / 2 + "px";
+    confetti.style.bottom = "0px";
+
+    // צבע וגודל אקראי
+    const size = 8 + Math.random() * 12;
+    confetti.style.width = size + "px";
+    confetti.style.height = size * 1.4 + "px";
+    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+    // פיזור אקראי
+    const x = (Math.random() - 0.5) * screenWidth; // צדדים
+    const y = screenHeight * (0.5 + Math.random() * 0.5); // למעלה
+
+    // אנימציה
+    const duration = 1 + Math.random() * 1 + "s";
+    confetti.style.transition = `transform ${duration} ease-out, opacity ${duration} ease-out`;
+
+    container.appendChild(confetti);
+
+    // נותנים למשהו זמן להיכנס ל-DOM ואז מזיזים
+    setTimeout(() => {
+      confetti.style.transform = `translate(${x}px, -${y}px) rotate(${360 + Math.random() * 360}deg)`;
+      confetti.style.opacity = 0;
+    }, 50);
+
+    setTimeout(() => confetti.remove(), 3000);
+  }
+},
   },
 };
 </script>
 
-<style scoped>
+<style>
 #end-screen {
   background-image: url("@/assets/media/endScreen/end.png");
   background-size: cover;
@@ -36,6 +79,7 @@ export default {
   background-position: center;
   background-repeat: no-repeat;
   overflow: hidden;
+  position: relative;
 }
 .graphic {
   display: flex;
@@ -108,8 +152,24 @@ export default {
 .againBtn:active {
   background-color: #d40000;
 }
-.confety {
-  width: 90vw;
-  position: absolute;
+.confetti-piece {
+  position: fixed;
+  bottom: 0;
+  left: 0; /* נקבע ב-JS */
+  border-radius: 2px;
+  pointer-events: none;
+  opacity: 1;
+  /* אין keyframes */
+}
+
+@keyframes popUp {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--x), -var(--y)) rotate(720deg);
+    opacity: 0;
+  }
 }
 </style>

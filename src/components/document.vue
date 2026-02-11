@@ -1177,7 +1177,7 @@ export default {
       hourB: "18:31",
       marked: "ר.ב.מ (02)",
       drugKind: '"THC"',
-      debugMode: false,
+      debugMode: true,
     };
   },
 
@@ -1243,14 +1243,34 @@ export default {
     // פונקציה בדיקת מרכאות
 
     normalize(text) {
-  if (!text) return "";
-  return text
-    .toString()
-    .trim()
-    .replace(/[\"'״”“]/g, "")
-    .replace(/\s+/g, " ")
-    .toLowerCase();
-},
+      if (!text) return "";
+
+      return (
+        text
+          .toString()
+          .trim()
+
+          // מסיר מרכאות מכל הסוגים
+          .replace(/[\"'״”“]/g, "")
+
+          // מאחד מקפים מיוחדים ל־-
+          .replace(/[–—]/g, "-")
+
+          // מאחד מפרידי תאריך ל־/
+          .replace(/[.\-]/g, "/")
+
+          // מסיר רווחים סביב /
+          .replace(/\s*\/\s*/g, "/")
+
+          // מסיר רווחים סביב פסיקים
+          .replace(/\s*,\s*/g, ",")
+
+          // מאחד רווחים מרובים לרווח אחד
+          .replace(/\s+/g, " ")
+
+          .toLowerCase()
+      );
+    },
 
 isWrong(user, correct) {
   return this.normalize(user) !== this.normalize(correct);
