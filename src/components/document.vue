@@ -1177,7 +1177,7 @@ export default {
       hourB: "18:31",
       marked: "ר.ב.מ (02)",
       drugKind: '"THC"',
-      debugMode: true,
+      debugMode: false,
     };
   },
 
