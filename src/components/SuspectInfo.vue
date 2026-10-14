@@ -59,31 +59,11 @@ export default {
   data() {
     return {
       compImg,
-      array1: [
-        "חשוד - רב״ט לירון אסולין מ.א- 9543874 ת.ז-256333791 , מאבטח מתקנים בבא״ף 8223",
-        "חשדות - סחר בסמים מסוכנים, שימוש והחזקה בסמים מסוכנים",
-        "נעצר ב5.6.2025 בשעה 13:00",
-        "משרת כטבח בבסיס בא”ח 21,",
-        "חשוד בהטרדה מינית ומעשה מגונה בכוח.",
-        "לאחר מספר שעות של חקירה,",
-        " החשוד הודה בחשדות המיוחסים לו",
-        "והוחלט לעצור אותו.",
-      ],
       showBtn: true,
       showDoc: false,
       activeIndex:0,
       instructionsClosed: false
     };
-  },
-  mounted() {
-    // זמן כולל = מספר שורות * זמן דיליי לכל שורה (3.2s) + זמן אנימציה אחרונה (2s)
-    const delayPerLine = 2;
-    const typingDuration = 1.5;
-    const totalDelay = (this.array1.length - 1) * delayPerLine + typingDuration;
-
-    setTimeout(() => {
-      this.showBtn = true;
-    }, totalDelay * 1000); // הופך לשניות
   },
   computed: {
   isFinished() {
